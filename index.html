@@ -16,16 +16,85 @@
       text-align:center;
     }
     .box{
-      padding:24px;
+      padding:28px 32px;
       border:1px solid #333;
-      border-radius:12px;
+      border-radius:14px;
+      min-width:260px;
+    }
+    .date{
+      margin-top:12px;
+      font-size:22px;
+    }
+    .time{
+      margin-top:6px;
+      font-size:28px;
+      letter-spacing:1px;
+    }
+    .weather{
+      margin-top:18px;
+      padding-top:12px;
+      border-top:1px solid #333;
+    }
+    .temp{
+      font-size:26px;
+      margin-top:4px;
     }
   </style>
 </head>
 <body>
   <div class="box">
     <h1>読み取り完了</h1>
-    <p>このページが開いたら成功</p>
+
+    <div class="date" id="date">----</div>
+    <div class="time" id="time">--:--</div>
+
+    <div class="weather">
+      <div>千葉の天気</div>
+      <div id="weather">取得中…</div>
+      <div class="temp" id="temp"></div>
+    </div>
   </div>
+
+<script>
+/* 日付と時間 */
+const now = new Date();
+const week = ['日','月','火','水','木','金','土'];
+const dateStr =
+  `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日（${week[now.getDay()]}）`;
+const timeStr =
+  `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+document.getElementById('date').textContent = dateStr;
+document.getElementById('time').textContent = timeStr;
+
+/* 天気（千葉） Open-Meteo */
+fetch('https://api.open-meteo.com/v1/forecast?latitude=35.6074&longitude=140.1065&current_weather=true')
+  .then(res => res.json())
+  .then(data => {
+    const code = data.current_weather.weathercode;
+    const temp = data.current_weather.temperature;
+
+    const map = {
+      0:'晴れ',
+      1:'ほぼ晴れ',
+      2:'一部くもり',
+      3:'くもり',
+      45:'霧',
+      48:'霧',
+      51:'弱い雨',
+      61:'雨',
+      80:'にわか雨',
+      95:'雷雨'
+    };
+
+    document.getElementById('weather').textContent =
+      map[code] || '不明';
+    document.getElementById('temp').textContent =
+      `${temp}℃`;
+  })
+  .catch(()=>{
+    document.getElementById('weather').textContent = '取得失敗';
+  });
+</script>
 </body>
 </html>
